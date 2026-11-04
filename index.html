@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Incidencias">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#121a15" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#111412" media="(prefers-color-scheme: dark)">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light dark">
 <title>Libro de incidencias</title>
@@ -18,20 +18,15 @@
   :root {
     --verde: #215732;      /* Pantone 357 */
     --naranja: #ED8B00;    /* Pantone 144 */
-    --verde-txt: #215732;
-    --bg: #f2f4f1;
-    --card: #ffffff;
-    --txt: #17211b;
-    --muted: #5f6b63;
-    --line: #dde3de;
-    --input: #ffffff;
-    --ok: #1d7a3c;
-    --warn: #a85f00;
+    --acento: #215732;
+    --bg: #ffffff;
+    --txt: #1a1d1b;
+    --muted: #6b726d;
+    --line: #e4e7e5;
+    --campo: #8a918c;
+    --ok: #215732;
+    --warn: #b36800;
     --err: #b3261e;
-    --pend-bg: #fff4e3;
-    --ok-bg: #e6f2ea;
-    --err-bg: #fbe9e7;
-    --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
     --sat: env(safe-area-inset-top, 0px);
     --sab: env(safe-area-inset-bottom, 0px);
     --sal: env(safe-area-inset-left, 0px);
@@ -39,40 +34,32 @@
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --verde-txt: #6fbf8a;
-      --bg: #0c120e;
-      --card: #151e18;
-      --txt: #e7eee9;
-      --muted: #94a39a;
-      --line: #27332c;
-      --input: #0f1712;
-      --ok: #5cc27e;
+      --acento: #6fbf8a;
+      --bg: #111412;
+      --txt: #e8ece9;
+      --muted: #9aa39d;
+      --line: #2a302c;
+      --campo: #59615c;
+      --ok: #6fbf8a;
       --warn: #ffad3b;
       --err: #ff8a80;
-      --pend-bg: #33240a;
-      --ok-bg: #142b1c;
-      --err-bg: #3a1714;
-      --shadow: none;
     }
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; padding: 0; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--txt); }
   body {
-    background: var(--bg); color: var(--txt);
-    font: 16px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-text-size-adjust: 100%;
-    min-height: 100vh;
   }
   button, input, select, textarea { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+
+  .wrap { max-width: 760px; margin: 0 auto;
+    padding: 0 calc(var(--sar) + 20px) 0 calc(var(--sal) + 20px); }
 
   /* ---------- Cabecera ---------- */
-  .topbar {
-    position: sticky; top: 0; z-index: 10;
-    background: var(--card);
-    padding: calc(var(--sat) + 10px) calc(var(--sar) + 16px) 0 calc(var(--sal) + 16px);
-    border-bottom: 1px solid var(--line);
-  }
-  .topbar-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  header { padding-top: calc(var(--sat) + 18px); }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
   .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
   .brand-mark {
     width: 32px; height: 32px; flex: 0 0 32px;
@@ -95,173 +82,165 @@
     display: block; margin-top: 1px;
     overflow: hidden; text-overflow: ellipsis;
   }
-  .estado { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: 0 0 auto; }
-  .pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
-    background: var(--ok-bg); color: var(--ok); white-space: nowrap;
+  .menu {
+    display: inline-flex; align-items: center; gap: 10px; flex: 0 0 auto;
+    border: 0; background: none; padding: 8px 2px 8px 8px; cursor: pointer; font-size: 16px;
   }
-  .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-  .pill.off { background: var(--err-bg); color: var(--err); }
-  .pill.pend { background: var(--pend-bg); color: var(--warn); }
-  .pill.pend::before { display: none; }
-  .franja { height: 4px; margin: 10px calc(-16px - var(--sar)) 0 calc(-16px - var(--sal));
-    background: linear-gradient(90deg, var(--verde) 0 72%, var(--naranja) 72% 100%); }
+  .menu .ico { display: grid; gap: 5px; width: 22px; }
+  .menu .ico i { display: block; height: 1.5px; background: currentColor; border-radius: 1px; }
+  .menu .ico i:nth-child(2) { width: 90%; justify-self: end; }
 
-  /* ---------- Pestañas ---------- */
-  .tabs { display: flex; gap: 4px; padding: 8px 0; }
-  .tab {
-    flex: 1; border: 0; background: transparent; padding: 9px 4px; border-radius: 10px;
-    font-size: 15px; font-weight: 600; color: var(--muted); cursor: pointer;
+  .estado { display: flex; gap: 14px; align-items: center; font-size: 13px; color: var(--muted); padding: 10px 0 0; min-height: 30px; }
+  .estado .dot::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-right: 6px; vertical-align: 1px; }
+  .estado .dot.off::before { background: var(--err); }
+  .estado .dot.busy::before { background: var(--naranja); }
+  .estado .pend { color: var(--warn); font-weight: 600; }
+
+  /* ---------- Formularios ---------- */
+  main { padding-bottom: 24px; }
+  h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 36px 0 14px; }
+  .campo { display: grid; gap: 6px; margin: 0 0 18px; }
+  .campo > label { font-size: 15px; color: var(--txt); }
+  @media (min-width: 700px) {
+    .campo { grid-template-columns: 210px 1fr; gap: 16px; align-items: start; }
+    .campo > label { text-align: right; padding-top: 11px; }
+    .campo .full { grid-column: 2; }
+    .acciones { padding-left: 226px; }
   }
-  .tab[aria-selected="true"] { background: var(--verde); color: #fff; }
-
-  /* ---------- Contenido ---------- */
-  main { padding: 14px calc(var(--sar) + 14px) calc(var(--sab) + 24px) calc(var(--sal) + 14px); max-width: 720px; margin: 0 auto; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); }
-  .card h2 { font-size: 17px; margin: 0; }
-  .card-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
-  label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin: 12px 0 6px; text-transform: uppercase; letter-spacing: .04em; }
-  label:first-child { margin-top: 0; }
-  select, input[type=text], input[type=url], input[type=password], textarea {
-    width: 100%; font-size: 17px; /* ≥16px evita el zoom en iPhone */
-    padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
-    background: var(--input); outline: none; -webkit-appearance: none; appearance: none;
+  input[type=text], input[type=url], input[type=password], select, textarea {
+    width: 100%; font-size: 17px; /* ≥16 px evita el zoom en iPhone */
+    padding: 10px 12px; border: 1px solid var(--campo); border-radius: 2px;
+    background: transparent; outline: none; -webkit-appearance: none; appearance: none;
   }
   select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23889' stroke-width='2' fill='none'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
-    min-height: 50px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px;
   }
-  select:focus, input:focus, textarea:focus { border-color: var(--naranja); }
-  textarea { min-height: 170px; resize: vertical; line-height: 1.45; }
-  .fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 6px; }
-  .small { font-size: 13px; }
-  .muted { color: var(--muted); }
+  select option { color: #000; }
+  input:focus, select:focus, textarea:focus { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); }
+  textarea { min-height: 200px; resize: vertical; line-height: 1.5; }
+  .ayuda { font-size: 13px; color: var(--muted); }
+  .fila { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
+
+  .acciones { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 4px; }
   .btn {
-    border: 0; border-radius: 14px; padding: 13px 16px; font-weight: 700; font-size: 16px; cursor: pointer;
-    background: var(--line); color: var(--txt); min-height: 48px;
+    border: 1px solid var(--campo); background: transparent; border-radius: 2px;
+    padding: 11px 18px; font-size: 16px; cursor: pointer; min-height: 46px;
   }
-  .btn:active { transform: scale(.98); }
-  .btn:disabled { opacity: .55; }
-  .btn.primary { background: var(--naranja); color: #1a1000; }
-  .btn.verde { background: var(--verde); color: #fff; }
-  .btn.big { width: 100%; font-size: 19px; min-height: 58px; margin-top: 12px; }
-  .btn.small { padding: 8px 12px; min-height: 38px; font-size: 14px; border-radius: 10px; }
-  .btn.ghost { background: transparent; border: 1.5px solid var(--line); }
-  .btn.peligro { background: transparent; color: var(--err); border: 1.5px solid var(--line); }
-  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-  .btns .full { grid-column: 1 / -1; }
+  .btn:active { opacity: .7; }
+  .btn:disabled { opacity: .45; }
+  .btn.primary { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 600; min-width: 160px; }
+  .btn.link { border: 0; padding: 6px 0; min-height: 0; color: var(--acento); text-decoration: underline; text-underline-offset: 3px; }
+  .btn.peligro { color: var(--err); }
+  @media (max-width: 699px) { .btn.primary { width: 100%; min-height: 54px; font-size: 18px; } }
 
-  .aviso { margin-top: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 600; display: none; }
-  .aviso.show { display: block; }
-  .aviso.ok { background: var(--ok-bg); color: var(--ok); }
-  .aviso.warn { background: var(--pend-bg); color: var(--warn); }
-  .aviso.err { background: var(--err-bg); color: var(--err); }
+  .aviso { font-size: 14px; margin-top: 10px; min-height: 0; }
+  .aviso.ok { color: var(--ok); }
+  .aviso.warn { color: var(--warn); }
+  .aviso.err { color: var(--err); }
 
-  /* ---------- Lista de anotaciones ---------- */
+  /* ---------- Lista ---------- */
+  .cab-lista { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 40px 0 6px; }
+  .cab-lista h2 { margin: 0; }
   .lista { list-style: none; margin: 0; padding: 0; }
-  .lista li { padding: 12px 0; border-top: 1px solid var(--line); }
-  .lista li:first-child { border-top: 0; }
-  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-  .meta b { color: var(--verde-txt); font-size: 14px; letter-spacing: .02em; }
-  .texto { white-space: pre-wrap; word-wrap: break-word; overflow-wrap: anywhere; font-size: 16px; }
-  .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
-  .badge.pend { background: var(--pend-bg); color: var(--warn); }
-  .badge.ok { background: var(--ok-bg); color: var(--ok); }
-  .lista li.pendiente { background: var(--pend-bg); margin: 0 -16px; padding: 12px 16px; border-top: 0; }
-  .lista li.pendiente + li { border-top: 0; }
-  .x { margin-left: auto; border: 0; background: transparent; color: var(--muted); font-size: 13px; text-decoration: underline; cursor: pointer; padding: 4px; }
-  .vacio { padding: 18px 0; text-align: center; color: var(--muted); }
+  .lista li { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 13px; color: var(--muted); margin-bottom: 3px; }
+  .meta .quien { font-weight: 600; color: var(--txt); font-size: 14px; }
+  .meta .quien.vacio { font-weight: 400; color: var(--muted); font-style: italic; }
+  .meta .tag { font-size: 12px; }
+  .meta .tag.pend { color: var(--warn); font-weight: 600; }
+  .meta .tag.ok { color: var(--ok); }
+  .texto { white-space: pre-wrap; overflow-wrap: anywhere; }
+  li.pendiente { border-left: 2px solid var(--naranja); padding-left: 12px; }
+  .x { margin-left: auto; border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; cursor: pointer; padding: 0; }
+  .vacia { padding: 18px 0; color: var(--muted); }
 
-  /* ---------- Upgrades ---------- */
-  .up-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); }
-  .up-item:first-child { border-top: 0; }
+  /* ---------- Ajustes ---------- */
+  .volver { border: 0; background: none; padding: 8px 0; cursor: pointer; font-size: 16px; color: var(--acento); }
+  .info { font-size: 15px; margin: 0 0 12px; }
+  .up-item { display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .up-item .t { flex: 1; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .up-item .d { font-size: 12px; color: var(--muted); display: block; }
+  .up-item .d { display: block; font-size: 12px; color: var(--muted); }
 
-  footer { text-align: center; font-size: 12px; color: var(--muted); padding: 8px 16px calc(var(--sab) + 18px); }
-  footer strong { color: var(--naranja); font-weight: 700; }
-  [hidden] { display: none !important; }
+  footer { text-align: center; font-size: 12px; color: var(--muted); padding: 28px 16px calc(var(--sab) + 22px); }
 
   .toast {
-    position: fixed; left: 50%; bottom: calc(var(--sab) + 20px); transform: translateX(-50%) translateY(20px);
-    background: #1b2a20; color: #fff; padding: 11px 18px; border-radius: 12px; font-weight: 600; font-size: 15px;
-    opacity: 0; pointer-events: none; transition: .25s; z-index: 50; max-width: 90vw; text-align: center;
+    position: fixed; left: 50%; bottom: calc(var(--sab) + 22px); transform: translateX(-50%) translateY(12px);
+    background: var(--txt); color: var(--bg); padding: 10px 16px; border-radius: 4px; font-size: 15px;
+    opacity: 0; pointer-events: none; transition: .2s; z-index: 50; max-width: 90vw; text-align: center;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-row">
+<header class="wrap">
+  <div class="topbar">
     <div class="brand">
       <div class="brand-mark">L</div>
       <div class="brand-text">
-        LIBRO DE INCIDENCIAS
-        <span class="sub" id="subParque">CPEIS · parque</span>
+        Libro de incidencias
+        <span class="sub" id="subParque">Herramienta personal · no oficial</span>
       </div>
     </div>
-    <div class="estado">
-      <span class="pill" id="pillRed">En línea</span>
-      <span class="pill pend" id="pillPend" hidden>0 pendientes</span>
-    </div>
+    <button class="menu" id="btnMenu" aria-label="Ajustes">
+      <span class="ico" aria-hidden="true"><i></i><i></i><i></i></span><span id="menuTxt">Ajustes</span>
+    </button>
   </div>
-  <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" data-v="libro" aria-selected="true">Libro</button>
-    <button class="tab" role="tab" data-v="ajustes" aria-selected="false">Ajustes</button>
-    <button class="tab" role="tab" data-v="upgrades" aria-selected="false">Upgrades</button>
-  </nav>
-  <div class="franja"></div>
+  <div class="estado">
+    <span class="dot" id="estadoRed">En línea</span>
+    <span class="pend" id="estadoPend" hidden></span>
+  </div>
 </header>
 
-<main>
+<main class="wrap">
   <!-- ================= LIBRO ================= -->
   <section id="v-libro">
-    <div class="card">
-      <div id="boxParque" hidden>
-        <label for="selParque">Parque</label>
-        <select id="selParque"></select>
-      </div>
-      <label for="selPersona">Quién anota</label>
+    <div class="campo" style="margin-top:18px">
+      <label for="selPersona">Anotado por</label>
       <select id="selPersona"></select>
-
-      <label for="txt">Incidencia / comunicación</label>
-      <textarea id="txt" maxlength="5000" autocapitalize="sentences" autocorrect="on" spellcheck="true"
-        placeholder="Escribe aquí la incidencia o comunicación para el siguiente turno…"></textarea>
-      <div class="fila small muted">
-        <span id="borradorInfo"></span>
-        <span id="contador">0 / 5000</span>
-      </div>
-      <button class="btn primary big" id="btnEnviar">Enviar</button>
-      <div class="aviso" id="aviso"></div>
+      <input type="text" id="txtOtro" class="full" hidden maxlength="80" autocomplete="off" autocapitalize="words"
+        placeholder="Escribe el nombre o apodo">
     </div>
-
-    <div class="card">
-      <div class="card-h">
-        <h2>Últimas anotaciones</h2>
-        <button class="btn small ghost" id="btnRefrescar" aria-label="Actualizar">↻ Actualizar</button>
+    <div class="campo">
+      <label for="txt">Incidencia</label>
+      <div>
+        <textarea id="txt" maxlength="5000" autocapitalize="sentences" autocorrect="on" spellcheck="true"
+          placeholder="Escribe aquí la incidencia o comunicación para el siguiente turno"></textarea>
+        <div class="fila"><span id="borradorInfo"></span><span id="contador">0 / 5000</span></div>
       </div>
-      <div class="small muted" id="estadoLista"></div>
-      <ul class="lista" id="lista"></ul>
     </div>
+    <div class="acciones">
+      <button class="btn primary" id="btnEnviar">Enviar</button>
+    </div>
+    <div class="acciones"><div class="aviso" id="aviso"></div></div>
+
+    <div class="cab-lista">
+      <h2>Últimas anotaciones</h2>
+      <button class="btn link" id="btnRefrescar">Actualizar</button>
+    </div>
+    <div class="ayuda" id="estadoLista"></div>
+    <ul class="lista" id="lista"></ul>
   </section>
 
   <!-- ================= AJUSTES ================= -->
   <section id="v-ajustes" hidden>
-    <div class="card">
-      <h2>Conexión</h2>
-      <label for="cfgUrl">URL de la aplicación web (Apps Script)</label>
+    <button class="volver" id="btnVolver">← Volver al libro</button>
+
+    <h2>Conexión</h2>
+    <div class="campo">
+      <label for="cfgUrl">URL de Apps Script</label>
       <input type="url" id="cfgUrl" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false"
         placeholder="https://script.google.com/macros/s/…/exec">
+    </div>
+    <div class="campo">
       <label for="cfgToken">Token</label>
-      <input type="password" id="cfgToken" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="El mismo que en Code.gs">
-      <div class="fila small"><label style="margin:6px 0;text-transform:none;letter-spacing:0;font-weight:500"><input type="checkbox" id="verToken"> Mostrar token</label></div>
-
-      <label for="cfgParque">Parque por defecto</label>
-      <select id="cfgParque"></select>
-
+      <div>
+        <input type="password" id="cfgToken" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="El mismo que en Code.gs">
+        <label class="ayuda" style="display:inline-flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="verToken"> Mostrar token</label>
+      </div>
+    </div>
+    <div class="campo">
       <label for="cfgN">Anotaciones a mostrar</label>
       <select id="cfgN">
         <option value="10">10</option>
@@ -269,106 +248,49 @@
         <option value="20">20</option>
         <option value="30">30</option>
       </select>
+    </div>
+    <div class="acciones">
+      <button class="btn primary" id="btnGuardar">Guardar</button>
+      <button class="btn" id="btnPing">Probar conexión</button>
+    </div>
+    <div class="acciones"><div class="aviso" id="avisoCfg"></div></div>
 
-      <div class="btns">
-        <button class="btn verde full" id="btnGuardar">Guardar ajustes</button>
-        <button class="btn" id="btnPing">Probar conexión</button>
-        <button class="btn" id="btnPersonal">Actualizar personal</button>
-      </div>
-      <div class="aviso" id="avisoCfg"></div>
+    <h2>Personal</h2>
+    <p class="info" id="infoPersonal"></p>
+    <div class="acciones" style="padding-left:0"><button class="btn" id="btnPersonal">Actualizar personal</button></div>
+
+    <h2>Envíos pendientes</h2>
+    <p class="info" id="infoCola"></p>
+    <div class="acciones" style="padding-left:0">
+      <button class="btn" id="btnReintentar">Reintentar ahora</button>
+      <button class="btn peligro" id="btnVaciarCola">Descartar pendientes</button>
     </div>
 
-    <div class="card">
-      <h2>Estado</h2>
-      <p class="small muted" id="infoPersonal" style="margin:8px 0"></p>
-      <p class="small muted" id="infoCola" style="margin:8px 0"></p>
-      <div class="btns">
-        <button class="btn" id="btnReintentar">Reintentar envío</button>
-        <button class="btn peligro" id="btnVaciarCola">Vaciar cola</button>
-      </div>
-      <p class="small muted" style="margin:14px 0 0">Versión de la app: <span id="verApp"></span></p>
+    <h2>Ideas y mejoras (Upgrades)</h2>
+    <p class="ayuda" style="margin:0 0 10px">Se guardan solo en este dispositivo. Exporta el TXT para pasárselo a quien mantenga la app.</p>
+    <textarea id="upTxt" style="min-height:90px" placeholder="Ej.: poder marcar una incidencia como resuelta"></textarea>
+    <div class="acciones" style="padding-left:0;margin-top:10px">
+      <button class="btn" id="btnUpAdd">Añadir</button>
+      <button class="btn" id="btnUpExport">Exportar TXT</button>
+      <button class="btn" id="btnUpCopy">Copiar</button>
     </div>
-  </section>
+    <div id="upList" style="margin-top:8px"></div>
 
-  <!-- ================= UPGRADES ================= -->
-  <section id="v-upgrades" hidden>
-    <div class="card">
-      <h2>Ideas y mejoras futuras</h2>
-      <p class="small muted" style="margin:6px 0 0">Se guardan solo en este móvil. Exporta el TXT para pasárselo a quien mantenga la app.</p>
-      <label for="upTxt">Nueva idea / pregunta</label>
-      <textarea id="upTxt" style="min-height:100px" placeholder="Ej.: poder marcar una incidencia como resuelta"></textarea>
-      <div class="btns">
-        <button class="btn verde full" id="btnUpAdd">Añadir</button>
-        <button class="btn" id="btnUpExport">Exportar TXT</button>
-        <button class="btn" id="btnUpCopy">Copiar texto</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-h"><h2>Lista</h2><span class="small muted" id="upCount"></span></div>
-      <div id="upList"></div>
-    </div>
+    <p class="ayuda" style="margin-top:32px">Versión <span id="verApp"></span> · Los ajustes se guardan en este navegador o dispositivo.</p>
   </section>
 </main>
 
-<footer>
-  <strong>Herramienta personal · no oficial</strong><br>
-  Libro de incidencias del parque
-</footer>
-
+<footer>Herramienta personal · no oficial</footer>
 <div class="toast" id="toast"></div>
 
-<script type="text/plain" id="promptOriginal">Soy bombero del Consorcio de Prevención, Extinción de Incendios y Salvamento de la Provincia de Sevilla (CPEIS). Quiero crear desde cero una aplicación web para el móvil, completamente independiente: su propia hoja de cálculo de Google, su propio Google Apps Script y su propio repositorio de GitHub (GitHub Pages). Necesito que me des los archivos y las instrucciones paso a paso para dejarla funcionando.
-
-## Objetivo: "Libro de incidencias del parque"
-Una página para que el personal del parque deje anotadas incidencias o comunicaciones del parque, y para que el siguiente turno pueda leerlas.
-
-## Hoja de cálculo de Google (nueva)
-Tiene dos pestañas con estas cabeceras en la fila 1:
-- "Personal": A Nombre · B APODO · C Cargo · D Parque
-  Ejemplo: Jose Antonio Falcon · FALCON · Jefe de dotación · Marchena
-  (la columna D tiene un desplegable con el parque)
-- "Registros": A Fecha / Hora · B Bombero · C Incidencia / comunicacion
-
-## Funcionamiento de la app
-1. Al abrir, se elige la persona que hace la anotación, de una lista sacada de la pestaña Personal que muestra APODO y Nombre. Si hay personal de varios parques, primero se elige el parque (la lista de parques sale de la columna D, sin repetidos) con un parque por defecto que se recuerda en el móvil. La última persona elegida queda preseleccionada.
-2. Un cuadro de texto grande para escribir la incidencia o comunicación, y un botón Enviar.
-3. Al enviar se añade una fila al final de "Registros":
-   - Fecha / Hora: dd/mm/aaaa hh:mm, puesta por el servidor en zona Europe/Madrid
-   - Bombero: el APODO (si está vacío, el Nombre)
-   - Incidencia / comunicacion: el texto escrito
-4. Debajo del formulario, las últimas 10–20 anotaciones (fecha, bombero y texto), de más reciente a más antigua, para que el siguiente turno las lea.
-5. Sin cobertura: la anotación se guarda en el móvil (localStorage) y se envía sola al volver la conexión, sin duplicarse (con un identificador único por anotación). Indicador visible de "pendiente / enviado".
-6. Sección de ajustes: URL de la aplicación web de Apps Script, token, parque por defecto y botón "Actualizar personal".
-
-## Backend: Google Apps Script vinculado a la nueva hoja
-- Publicado como Aplicación web (Ejecutar como: yo · Acceso: cualquier usuario), con la URL terminada en /exec.
-- Protegido con un TOKEN (constante en el código) que la app envía en cada petición.
-- doGet: action=ping (comprobar conexión), action=personal (devuelve el personal) y action=registros (devuelve las últimas anotaciones).
-- doPost: recibe {token, registros:[{uid, bombero, texto, …}]}, añade las filas, ignora los uid ya recibidos y devuelve los uid procesados. Usa LockService para que dos envíos simultáneos no se pisen.
-- Si las pestañas no existen o no tienen cabeceras, las crea.
-- Las peticiones deben ser compatibles con Apps Script desde otra web: POST con el cuerpo JSON como texto plano y sin cabeceras personalizadas (sin preflight CORS).
-
-## Frontend
-- Un único index.html (HTML + CSS + JS puro, sin frameworks) pensado para iPhone/Safari y para instalarse con "Añadir a pantalla de inicio": metas de app web (apple-mobile-web-app-capable, viewport-fit=cover, áreas seguras), apple-touch-icon, botones grandes y teclado cómodo.
-- Estilo: colores corporativos del Consorcio, verde Pantone 357 (#215732) y naranja Pantone 144 (#ED8B00), con modo oscuro. Sin el escudo oficial y con la nota "Herramienta personal · no oficial".
-
-## Lo que necesito que me devuelvas
-1. index.html completo.
-2. apple-touch-icon.png (o cómo generarlo).
-3. Code.gs completo para Apps Script.
-4. Instrucciones paso a paso, muy detalladas, para:
-   a) preparar la hoja de cálculo (pestañas y cabeceras);
-   b) pegar el script, poner el token, ajustar la zona horaria del proyecto y publicarlo como Aplicación web, incluido qué hacer ante el aviso "Google no ha verificado esta aplicación";
-   c) crear el repositorio en GitHub (proponme un nombre corto sin espacios), subir los archivos y activar GitHub Pages;
-   d) instalar la app en el iPhone desde Safari y configurarla;
-   e) probar que funciona: envío, lectura de últimas anotaciones y modo sin cobertura.
-5. Cómo actualizar más adelante la app (index.html) y el script (nueva versión de la implementación sin cambiar la URL /exec) sin perder los ajustes guardados en el móvil.</script>
+<script type="text/plain" id="promptOriginal">__PROMPT__</script>
 
 <script>
 (() => {
   'use strict';
-  const APP_VERSION = '20261104';
+  const APP_VERSION = '20261104.2';
   const MAX_TEXTO = 5000;
+  const OTRO = '__otro__';
 
   /* ---------------- Almacenamiento local ---------------- */
   const PREF = 'libroInc.';
@@ -378,12 +300,13 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
     del(k) { try { localStorage.removeItem(PREF + k); } catch (e) {} }
   };
 
-  let cfg = Object.assign({ url: '', token: '', parqueDef: '', n: 20 }, store.get('cfg', {}));
+  let cfg = Object.assign({ url: '', token: '', n: 20 }, store.get('cfg', {}));
   let personal = store.get('personal', []);
-  let cola = store.get('cola', []);            // anotaciones pendientes de envío
-  let misUids = store.get('misUids', []);      // últimas enviadas desde este móvil
-  let registrosCache = store.get('registros', { t: 0, parque: '', lista: [] });
+  let cola = store.get('cola', []);
+  let misUids = store.get('misUids', []);
+  let registrosCache = store.get('registros', { t: 0, lista: [] });
   let registros = registrosCache.lista || [];
+  let upgrades = store.get('upgrades', []);
   let enviando = false;
   let ultimoError = null;
 
@@ -399,33 +322,33 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
   const nuevoUid = () => (window.crypto && crypto.randomUUID)
     ? crypto.randomUUID()
     : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10) + '-' + Math.random().toString(36).slice(2, 10);
+  const plural = (n, s, p) => n + ' ' + (n === 1 ? s : p);
 
   /* ---------------- Avisos ---------------- */
   let toastT;
   function toast(msg) {
     const t = $('toast'); t.textContent = msg; t.classList.add('show');
-    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600);
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400);
   }
   const avisoTimers = {};
   function aviso(msg, tipo = 'ok', id = 'aviso', ms = 5000) {
-    const el = $(id); el.textContent = msg; el.className = 'aviso show ' + tipo;
+    const el = $(id); el.textContent = msg; el.className = 'aviso ' + tipo;
     clearTimeout(avisoTimers[id]);
-    if (ms) avisoTimers[id] = setTimeout(() => { el.className = 'aviso'; }, ms);
+    if (ms) avisoTimers[id] = setTimeout(() => { el.textContent = ''; }, ms);
   }
 
   /* ---------------- Comunicación con Apps Script ---------------- */
   function fetchT(url, opt, ms) {
     const c = new AbortController();
     const t = setTimeout(() => c.abort(), ms);
-    return fetch(url, Object.assign({}, opt, { signal: c.signal, redirect: 'follow' }))
-      .finally(() => clearTimeout(t));
+    return fetch(url, Object.assign({}, opt, { signal: c.signal, redirect: 'follow' })).finally(() => clearTimeout(t));
   }
   async function leerRespuesta(r) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const t = await r.text();
     let j;
     try { j = JSON.parse(t); }
-    catch (e) { throw new Error('Respuesta no válida. Revisa que la URL acabe en /exec y que el acceso sea "Cualquier usuario".'); }
+    catch (e) { throw new Error('Respuesta no válida. Comprueba que la URL termina en /exec y que el acceso es "Cualquier usuario".'); }
     if (!j.ok) {
       const err = new Error(j.error === 'token' ? 'Token incorrecto' : (j.error || 'Error del servidor'));
       err.token = j.error === 'token';
@@ -435,7 +358,7 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
   }
   function errorLegible(e) {
     if (e && e.name === 'AbortError') return 'Tiempo de espera agotado';
-    if (e && e.message === 'Load failed' || e && e.message === 'Failed to fetch') return 'Sin conexión con el servidor';
+    if (e && (e.message === 'Load failed' || e.message === 'Failed to fetch' || /NetworkError/.test(e.message))) return 'Sin conexión con el servidor';
     return (e && e.message) || 'Error';
   }
   async function apiGet(params) {
@@ -446,78 +369,56 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
   }
   async function apiPost(obj) {
     if (!cfg.url) throw new Error('Falta la URL en Ajustes');
-    // Cuerpo como texto plano y sin cabeceras propias → petición "simple", sin preflight CORS.
+    // Cuerpo JSON como texto plano y sin cabeceras propias → sin preflight CORS.
     const r = await fetchT(cfg.url, { method: 'POST', body: JSON.stringify(obj) }, 30000);
     return leerRespuesta(r);
   }
 
-  /* ---------------- Estado de red ---------------- */
+  /* ---------------- Estado ---------------- */
   function pintarEstado() {
-    const pill = $('pillRed');
-    if (!navigator.onLine) { pill.textContent = 'Sin conexión'; pill.className = 'pill off'; }
-    else if (enviando) { pill.textContent = 'Enviando…'; pill.className = 'pill pend'; }
-    else if (ultimoError) { pill.textContent = 'Sin servidor'; pill.className = 'pill off'; }
-    else { pill.textContent = 'En línea'; pill.className = 'pill'; }
-    const pp = $('pillPend');
-    pp.hidden = !cola.length;
-    pp.textContent = '⏳ ' + cola.length + (cola.length === 1 ? ' pendiente' : ' pendientes');
+    const red = $('estadoRed');
+    if (!navigator.onLine) { red.textContent = 'Sin conexión'; red.className = 'dot off'; }
+    else if (enviando) { red.textContent = 'Enviando…'; red.className = 'dot busy'; }
+    else if (!cfg.url) { red.textContent = 'Sin configurar'; red.className = 'dot off'; }
+    else if (ultimoError) { red.textContent = 'Servidor no disponible'; red.className = 'dot off'; }
+    else { red.textContent = 'En línea'; red.className = 'dot'; }
+    const p = $('estadoPend');
+    p.hidden = !cola.length;
+    p.textContent = plural(cola.length, 'anotación pendiente', 'anotaciones pendientes');
     $('infoCola').textContent = cola.length
-      ? `${cola.length} anotación(es) pendiente(s) de envío en este móvil.`
-      : 'No hay anotaciones pendientes de envío.';
+      ? `${plural(cola.length, 'anotación guardada', 'anotaciones guardadas')} en este dispositivo a la espera de enviarse.`
+      : 'No hay nada pendiente de enviar.';
     $('btnVaciarCola').disabled = !cola.length;
   }
 
-  /* ---------------- Personal y parques ---------------- */
+  /* ---------------- Personal ---------------- */
   const clave = (p) => (p.nombre || '') + '|' + (p.apodo || '');
   const etiqueta = (p) => p.apodo ? `${p.apodo} — ${p.nombre}` : p.nombre;
-  function listaParques() {
-    return [...new Set(personal.map((p) => p.parque).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
-  }
-  function parqueActual() {
-    const ps = listaParques();
-    if (ps.length === 1) return ps[0];
-    return $('selParque').value || '';
-  }
-  function pintarParques() {
-    const ps = listaParques();
-    const sel = $('selParque');
-    const previo = sel.value || cfg.parqueDef || store.get('ultimoParque', '');
-    sel.innerHTML = ps.map((p) => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
-    sel.value = ps.includes(previo) ? previo : (ps[0] || '');
-    $('boxParque').hidden = ps.length <= 1;
-
-    const sd = $('cfgParque');
-    sd.innerHTML = '<option value="">— Sin parque por defecto —</option>' +
-      ps.map((p) => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
-    sd.value = ps.includes(cfg.parqueDef) ? cfg.parqueDef : '';
-    pintarSub();
-  }
   function pintarSub() {
-    const pq = parqueActual();
-    $('subParque').textContent = pq ? 'CPEIS · Parque ' + pq : 'CPEIS · parque';
+    const ps = [...new Set(personal.map((p) => p.parque).filter(Boolean))];
+    $('subParque').textContent = ps.length === 1 ? 'Parque ' + ps[0] : 'Herramienta personal · no oficial';
   }
   function pintarPersonas() {
     const sel = $('selPersona');
-    if (!personal.length) {
-      sel.innerHTML = '<option value="">— Sin personal: ve a Ajustes —</option>';
-      return;
-    }
-    const pq = parqueActual();
-    const multi = listaParques().length > 1;
-    const lista = personal
-      .filter((p) => !multi || !p.parque || p.parque === pq)
-      .sort((a, b) => (a.apodo || a.nombre).localeCompare(b.apodo || b.nombre, 'es'));
-    sel.innerHTML = '<option value="">— Elige quién anota —</option>' +
-      lista.map((p) => `<option value="${esc(clave(p))}">${esc(etiqueta(p))}</option>`).join('');
-    const ult = store.get('ultimaPersona', '');
-    if (lista.some((p) => clave(p) === ult)) sel.value = ult;
+    const actual = sel.value;
+    const lista = personal.slice().sort((a, b) => (a.apodo || a.nombre).localeCompare(b.apodo || b.nombre, 'es'));
+    sel.innerHTML = '<option value="">Sin indicar</option>' +
+      lista.map((p) => `<option value="${esc(clave(p))}">${esc(etiqueta(p))}</option>`).join('') +
+      `<option value="${OTRO}">Otra persona (escribir nombre)…</option>`;
+    const pref = actual || store.get('ultimaPersona', '');
+    if (pref === OTRO || lista.some((p) => clave(p) === pref)) sel.value = pref;
+    else sel.value = '';
+    pintarOtro();
+  }
+  function pintarOtro() {
+    const otro = $('selPersona').value === OTRO;
+    $('txtOtro').hidden = !otro;
   }
   function pintarInfoPersonal() {
     const t = store.get('personalT', 0);
-    const np = listaParques().length;
     $('infoPersonal').textContent = personal.length
-      ? `Personal guardado: ${personal.length} persona(s)${np ? ' · ' + np + ' parque(s)' : ''}${t ? ' · actualizado ' + fmtFecha(t) : ''}.`
-      : 'Todavía no hay personal guardado en este móvil.';
+      ? `${plural(personal.length, 'persona cargada', 'personas cargadas')} desde la hoja${t ? ' · actualizado el ' + fmtFecha(t) : ''}.`
+      : 'Aún no se ha cargado el personal. Configura la conexión y pulsa «Actualizar personal».';
   }
   async function actualizarPersonal(silencioso) {
     try {
@@ -529,8 +430,8 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
       store.set('personal', personal);
       store.set('personalT', Date.now());
       ultimoError = null;
-      pintarParques(); pintarPersonas(); pintarInfoPersonal(); pintarEstado();
-      if (!silencioso) aviso(`Personal actualizado: ${personal.length} persona(s), ${listaParques().length} parque(s).`, 'ok', 'avisoCfg');
+      pintarPersonas(); pintarSub(); pintarInfoPersonal(); pintarEstado();
+      if (!silencioso) aviso(`Personal actualizado: ${plural(personal.length, 'persona', 'personas')}.`, 'ok', 'avisoCfg');
       return true;
     } catch (e) {
       if (!silencioso) aviso('No se pudo actualizar el personal: ' + errorLegible(e), 'err', 'avisoCfg', 8000);
@@ -539,75 +440,67 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
   }
 
   /* ---------------- Últimas anotaciones ---------------- */
+  const quienHtml = (n) => n ? `<span class="quien">${esc(n)}</span>` : '<span class="quien vacio">Sin indicar</span>';
   function pintarLista() {
-    const pq = parqueActual();
-    const multi = listaParques().length > 1;
-    const pend = cola.filter((x) => !multi || !x.parque || x.parque === pq).slice().reverse();
-    const yaMios = new Set(misUids);
+    const mios = new Set(misUids);
     const html = [];
-    pend.forEach((x) => {
-      html.push(`<li class="pendiente">
-        <div class="meta"><span class="badge pend">⏳ Pendiente</span><b>${esc(x.bombero)}</b><span>${esc(fmtFecha(x.creado))}</span>
+    cola.slice().reverse().forEach((x) => {
+      html.push(`<li class="pendiente"><div class="meta">${quienHtml(x.bombero)}<span>${esc(fmtFecha(x.creado))}</span>
+        <span class="tag pend">Pendiente de envío</span>
         ${enviando ? '' : `<button class="x" data-borrar="${esc(x.uid)}">Eliminar</button>`}</div>
         <div class="texto">${esc(x.texto)}</div></li>`);
     });
     registros.forEach((r) => {
-      const mio = r.uid && yaMios.has(r.uid);
-      html.push(`<li>
-        <div class="meta">${mio ? '<span class="badge ok">✓ Enviado</span>' : ''}<b>${esc(r.bombero)}</b><span>${esc(r.fecha)}</span></div>
+      html.push(`<li><div class="meta">${quienHtml(r.bombero)}<span>${esc(r.fecha)}</span>
+        ${r.uid && mios.has(r.uid) ? '<span class="tag ok">✓ Enviado</span>' : ''}</div>
         <div class="texto">${esc(r.texto)}</div></li>`);
     });
-    $('lista').innerHTML = html.length ? html.join('') : '<li class="vacio">Sin anotaciones todavía.</li>';
+    $('lista').innerHTML = html.length ? html.join('') : '<li class="vacia" style="border:0">No hay anotaciones todavía.</li>';
   }
   async function cargarRegistros() {
     const est = $('estadoLista');
-    if (!cfg.url) { est.textContent = 'Configura la URL y el token en Ajustes.'; pintarLista(); return; }
+    if (!cfg.url) { est.textContent = 'Configura la conexión en Ajustes para ver y enviar anotaciones.'; pintarLista(); return; }
     est.textContent = 'Cargando…';
-    const pq = parqueActual();
     try {
-      const j = await apiGet({ action: 'registros', n: cfg.n, parque: pq });
+      const j = await apiGet({ action: 'registros', n: cfg.n });
       registros = j.registros || [];
-      registrosCache = { t: Date.now(), parque: pq, lista: registros };
+      registrosCache = { t: Date.now(), lista: registros };
       store.set('registros', registrosCache);
       ultimoError = null;
       est.textContent = 'Actualizado a las ' + fmtHora(Date.now());
     } catch (e) {
       ultimoError = e;
-      if (registrosCache.parque === pq) registros = registrosCache.lista || [];
-      est.textContent = (registrosCache.t && registrosCache.parque === pq)
-        ? `${errorLegible(e)} · mostrando copia guardada (${fmtFecha(registrosCache.t)})`
+      registros = registrosCache.lista || [];
+      est.textContent = registrosCache.t
+        ? `${errorLegible(e)}. Mostrando la última copia (${fmtFecha(registrosCache.t)}).`
         : errorLegible(e);
     }
     pintarEstado(); pintarLista();
   }
 
-  /* ---------------- Envío y cola sin cobertura ---------------- */
+  /* ---------------- Envío y cola sin conexión ---------------- */
+  function quienAnota() {
+    const v = $('selPersona').value;
+    if (v === OTRO) return $('txtOtro').value.trim().replace(/\s+/g, ' ').slice(0, 80);
+    const p = personal.find((x) => clave(x) === v);
+    return p ? (p.apodo || p.nombre) : '';
+  }
   function enviar() {
     const texto = $('txt').value.trim();
-    const p = personal.find((x) => clave(x) === $('selPersona').value);
-    if (!p) { aviso('Elige quién hace la anotación.', 'err'); $('selPersona').focus(); return; }
-    if (!texto) { aviso('Escribe la incidencia o comunicación.', 'err'); $('txt').focus(); return; }
-    const item = {
-      uid: nuevoUid(),
-      bombero: p.apodo || p.nombre,
-      nombre: p.nombre,
-      parque: p.parque || parqueActual() || '',
-      texto: texto.slice(0, MAX_TEXTO),
-      creado: Date.now()
-    };
+    if (!texto) { aviso('Escribe la incidencia antes de enviar.', 'err'); $('txt').focus(); return; }
+    const item = { uid: nuevoUid(), bombero: quienAnota(), texto: texto.slice(0, MAX_TEXTO), creado: Date.now() };
     cola.push(item);
-    if (!store.set('cola', cola)) { aviso('¡No se pudo guardar en el móvil! Copia el texto antes de salir.', 'err', 'aviso', 0); return; }
-    store.set('ultimaPersona', clave(p));
-    store.set('ultimoParque', parqueActual());
+    if (!store.set('cola', cola)) { aviso('No se pudo guardar en este dispositivo. Copia el texto antes de salir.', 'err', 'aviso', 0); cola.pop(); return; }
+    store.set('ultimaPersona', $('selPersona').value);
     $('txt').value = ''; store.del('borrador'); actualizarContador();
+    if ($('selPersona').value === OTRO) { $('txtOtro').value = ''; $('selPersona').value = ''; pintarOtro(); store.set('ultimaPersona', ''); }
     $('txt').blur();
     pintarEstado(); pintarLista();
-    if (!cfg.url) aviso('Guardada en el móvil. Configura la URL en Ajustes para enviarla.', 'warn', 'aviso', 0);
-    else if (!navigator.onLine) aviso('Sin cobertura: guardada en el móvil. Se enviará sola al volver la conexión.', 'warn', 'aviso', 0);
+    if (!cfg.url) aviso('Guardada en este dispositivo. Configura la conexión en Ajustes para enviarla.', 'warn', 'aviso', 0);
+    else if (!navigator.onLine) aviso('Sin conexión: guardada en este dispositivo. Se enviará sola al recuperar la conexión.', 'warn', 'aviso', 0);
     else aviso('Enviando…', 'warn', 'aviso', 0);
     procesarCola();
   }
-
   async function procesarCola() {
     pintarEstado();
     if (enviando || !cola.length || !cfg.url) return;
@@ -616,10 +509,7 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
     try {
       while (cola.length) {
         const lote = cola.slice(0, 25);
-        const j = await apiPost({
-          token: cfg.token,
-          registros: lote.map(({ uid, bombero, nombre, parque, texto, creado }) => ({ uid, bombero, nombre, parque, texto, creado }))
-        });
+        const j = await apiPost({ token: cfg.token, registros: lote.map(({ uid, bombero, texto, creado }) => ({ uid, bombero, texto, creado })) });
         const hechos = new Set(j.procesados || []);
         if (!hechos.size) throw new Error('El servidor no confirmó el envío');
         cola = cola.filter((x) => !hechos.has(x.uid));
@@ -629,22 +519,19 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
         total += hechos.size;
       }
       ultimoError = null;
-    } catch (e) {
-      error = e; ultimoError = e;
-    }
+    } catch (e) { error = e; ultimoError = e; }
     enviando = false;
     pintarEstado(); pintarLista();
     if (error) {
-      if (error.token) aviso('Token incorrecto: revisa Ajustes. La anotación sigue guardada en el móvil.', 'err', 'aviso', 0);
-      else aviso(`Pendiente de envío (${errorLegible(error)}). Se reintentará sola.`, 'warn', 'aviso', 0);
+      if (error.token) aviso('Token incorrecto: revísalo en Ajustes. La anotación sigue guardada.', 'err', 'aviso', 0);
+      else aviso(`Pendiente de envío (${errorLegible(error)}). Se reintentará automáticamente.`, 'warn', 'aviso', 0);
     } else if (total) {
-      aviso(total === 1 ? 'Enviado ✓' : `Enviadas ✓ (${total})`, 'ok');
-      toast('Anotación enviada ✓');
+      aviso(total === 1 ? 'Enviada ✓' : `Enviadas ✓ (${total})`, 'ok');
+      toast('Anotación enviada');
       cargarRegistros();
     }
   }
 
-  /* ---------------- Borrador y contador ---------------- */
   function actualizarContador() {
     const n = $('txt').value.length;
     $('contador').textContent = `${n} / ${MAX_TEXTO}`;
@@ -660,26 +547,21 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
     $('verApp').textContent = APP_VERSION;
   }
   function leerFormAjustes() {
-    const url = $('cfgUrl').value.trim();
-    cfg = {
-      url,
-      token: $('cfgToken').value.trim(),
-      parqueDef: $('cfgParque').value,
-      n: Number($('cfgN').value) || 20
-    };
+    cfg = { url: $('cfgUrl').value.trim(), token: $('cfgToken').value.trim(), n: Number($('cfgN').value) || 20 };
     store.set('cfg', cfg);
-    return url;
   }
-  function guardarAjustes() {
-    const url = leerFormAjustes();
-    if (url && !/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) {
+  async function guardarAjustes() {
+    leerFormAjustes();
+    if (cfg.url && !/^https:\/\/script\.google\.com\/.+\/exec$/.test(cfg.url)) {
       aviso('Guardado, pero la URL no parece correcta: debe empezar por https://script.google.com/ y terminar en /exec.', 'warn', 'avisoCfg', 9000);
     } else {
-      aviso('Ajustes guardados en este móvil.', 'ok', 'avisoCfg');
+      aviso('Ajustes guardados.', 'ok', 'avisoCfg');
     }
-    if (cfg.parqueDef && listaParques().includes(cfg.parqueDef)) $('selParque').value = cfg.parqueDef;
-    pintarSub(); pintarPersonas();
-    procesarCola(); cargarRegistros();
+    pintarEstado();
+    if (cfg.url) {
+      if (!personal.length) await actualizarPersonal(true);
+      procesarCola(); cargarRegistros();
+    }
   }
   async function probarConexion() {
     leerFormAjustes();
@@ -687,7 +569,7 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
     try {
       const j = await apiGet({ action: 'ping' });
       ultimoError = null;
-      aviso(`Conexión correcta ✓ · hora del servidor: ${j.servidor} · script v${j.version}`, 'ok', 'avisoCfg', 9000);
+      aviso(`Conexión correcta ✓ · hora del servidor ${j.servidor} · script ${j.version}`, 'ok', 'avisoCfg', 9000);
     } catch (e) {
       ultimoError = e;
       aviso('Fallo de conexión: ' + errorLegible(e), 'err', 'avisoCfg', 10000);
@@ -696,23 +578,20 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
   }
 
   /* ---------------- Upgrades ---------------- */
-  let upgrades = store.get('upgrades', []);
   function pintarUpgrades() {
-    $('upCount').textContent = upgrades.length ? upgrades.length + ' elemento(s)' : '';
     $('upList').innerHTML = upgrades.length
       ? upgrades.map((u) => `<div class="up-item"><div class="t">${esc(u.texto)}<span class="d">${esc(fmtFecha(u.t))}</span></div>
-          <button class="btn small peligro" data-up="${esc(u.id)}">Quitar</button></div>`).join('')
-      : '<div class="vacio">Aún no hay ideas apuntadas.</div>';
+          <button class="x" data-up="${esc(u.id)}">Quitar</button></div>`).join('')
+      : '<div class="vacia">Sin ideas apuntadas.</div>';
   }
   function textoExport() {
-    const prompt = $('promptOriginal').textContent.trim();
     const lineas = [
       'LIBRO DE INCIDENCIAS DEL PARQUE — Exportación',
       'Versión de la app: ' + APP_VERSION,
       'Fecha de exportación: ' + fmtFecha(Date.now()),
       '',
       '==================== PROMPT ORIGINAL ====================',
-      prompt,
+      $('promptOriginal').textContent.trim(),
       '',
       `==================== UPGRADES / IDEAS (${upgrades.length}) ====================`
     ];
@@ -733,19 +612,25 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
     catch (e) { toast('No se pudo copiar'); }
   }
 
-  /* ---------------- Pestañas ---------------- */
+  /* ---------------- Vistas ---------------- */
   function mostrar(v) {
-    document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.v === v)));
-    ['libro', 'ajustes', 'upgrades'].forEach((x) => { $('v-' + x).hidden = x !== v; });
-    if (v === 'ajustes') { cargarFormAjustes(); pintarParques(); pintarInfoPersonal(); pintarEstado(); }
+    $('v-libro').hidden = v !== 'libro';
+    $('v-ajustes').hidden = v !== 'ajustes';
+    $('menuTxt').textContent = v === 'ajustes' ? 'Cerrar' : 'Ajustes';
+    if (v === 'ajustes') { cargarFormAjustes(); pintarInfoPersonal(); pintarUpgrades(); pintarEstado(); }
     window.scrollTo(0, 0);
   }
 
   /* ---------------- Eventos ---------------- */
-  document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => mostrar(t.dataset.v)));
-  $('selParque').addEventListener('change', () => { store.set('ultimoParque', parqueActual()); pintarSub(); pintarPersonas(); pintarLista(); cargarRegistros(); });
-  $('selPersona').addEventListener('change', () => { if ($('selPersona').value) store.set('ultimaPersona', $('selPersona').value); });
+  $('btnMenu').addEventListener('click', () => mostrar($('v-ajustes').hidden ? 'ajustes' : 'libro'));
+  $('btnVolver').addEventListener('click', () => mostrar('libro'));
+  $('selPersona').addEventListener('change', () => {
+    pintarOtro();
+    if ($('selPersona').value === OTRO) $('txtOtro').focus();
+    else store.set('ultimaPersona', $('selPersona').value);
+  });
   $('txt').addEventListener('input', () => { store.set('borrador', $('txt').value); actualizarContador(); });
+  $('txt').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); enviar(); } });
   $('btnEnviar').addEventListener('click', enviar);
   $('btnRefrescar').addEventListener('click', () => { procesarCola(); cargarRegistros(); });
   $('lista').addEventListener('click', (ev) => {
@@ -759,13 +644,13 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
   $('btnPersonal').addEventListener('click', async () => {
     leerFormAjustes();
     aviso('Descargando personal…', 'warn', 'avisoCfg', 0);
-    if (await actualizarPersonal(false)) cargarRegistros();
+    await actualizarPersonal(false);
   });
   $('verToken').addEventListener('change', (e) => { $('cfgToken').type = e.target.checked ? 'text' : 'password'; });
-  $('btnReintentar').addEventListener('click', () => { if (!cola.length) toast('No hay pendientes'); procesarCola(); });
+  $('btnReintentar').addEventListener('click', () => { if (!cola.length) toast('No hay nada pendiente'); procesarCola(); });
   $('btnVaciarCola').addEventListener('click', () => {
     if (!cola.length) return;
-    if (!confirm(`¿Borrar ${cola.length} anotación(es) pendiente(s)? No se enviarán.`)) return;
+    if (!confirm(`¿Descartar ${plural(cola.length, 'anotación pendiente', 'anotaciones pendientes')}? No se enviarán.`)) return;
     cola = []; store.set('cola', cola); pintarEstado(); pintarLista();
   });
   $('btnUpAdd').addEventListener('click', () => {
@@ -786,20 +671,19 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
     if (document.visibilityState === 'visible') { procesarCola(); cargarRegistros(); }
   });
   setInterval(() => { if (cola.length && navigator.onLine) procesarCola(); }, 30000);
-  setInterval(() => { if (document.visibilityState === 'visible' && navigator.onLine && !cola.length) cargarRegistros(); }, 180000);
+  setInterval(() => { if (document.visibilityState === 'visible' && navigator.onLine && !cola.length && cfg.url) cargarRegistros(); }, 180000);
 
   /* ---------------- Arranque ---------------- */
   $('txt').value = store.get('borrador', '');
   actualizarContador();
   cargarFormAjustes();
-  pintarParques(); pintarPersonas(); pintarInfoPersonal(); pintarUpgrades(); pintarEstado(); pintarLista();
+  pintarPersonas(); pintarSub(); pintarEstado(); pintarLista();
   if (!cfg.url) {
-    $('estadoLista').textContent = 'Primero configura la URL y el token en Ajustes.';
+    $('estadoLista').textContent = 'Configura la conexión en Ajustes para ver y enviar anotaciones.';
   } else {
     (async () => {
       await procesarCola();
-      if (!personal.length) await actualizarPersonal(true);
-      else actualizarPersonal(true);   // refresco silencioso en segundo plano
+      if (!personal.length) await actualizarPersonal(true); else actualizarPersonal(true);
       cargarRegistros();
     })();
   }
