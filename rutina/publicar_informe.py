@@ -9,7 +9,8 @@ La app lo muestra en la pestaña Informe.
 
 Variables de entorno: LIBRO_URL y LIBRO_TOKEN (las mismas que leer_anotaciones.py).
 
-Uso:  python3 rutina/publicar_informe.py informe.md [anotaciones.json]
+Uso:  python3 rutina/publicar_informe.py /tmp/libro/informe.md [/tmp/libro/anotaciones.json] [--simular]
+      --simular  comprueba el informe y muestra lo que se enviaría, sin publicar nada
 """
 import json
 import os
@@ -20,18 +21,27 @@ import urllib.request
 def main():
     url = os.environ.get("LIBRO_URL", "").strip()
     token = os.environ.get("LIBRO_TOKEN", "").strip()
-    if not url or not token:
+    simular = "--simular" in sys.argv
+    sys.argv = [a for a in sys.argv if a != "--simular"]
+    if (not url or not token) and not simular:
         sys.exit("ERROR: faltan las variables de entorno LIBRO_URL y/o LIBRO_TOKEN.")
     if len(sys.argv) < 2:
-        sys.exit("Uso: python3 rutina/publicar_informe.py informe.md [anotaciones.json]")
+        sys.exit("Uso: python3 rutina/publicar_informe.py /tmp/libro/informe.md [/tmp/libro/anotaciones.json] [--simular]")
 
     with open(sys.argv[1], encoding="utf-8") as f:
         texto = f.read().strip()
     if not texto:
         sys.exit("ERROR: el informe está vacío.")
-    meta_path = sys.argv[2] if len(sys.argv) > 2 else "anotaciones.json"
+    meta_path = sys.argv[2] if len(sys.argv) > 2 else "/tmp/libro/anotaciones.json"
     with open(meta_path, encoding="utf-8") as f:
         meta = json.load(f)
+
+    if len(texto) > 45000:
+        sys.exit(f"ERROR: el informe tiene {len(texto)} caracteres (máximo 45000).")
+    if simular:
+        print(f"[SIMULACIÓN] Se publicaría un informe de {len(texto)} caracteres, "
+              f"periodo {meta['desde']} – {meta['hasta']}, {meta.get('total', 0)} anotaciones. No se ha enviado nada.")
+        return
 
     cuerpo = json.dumps({
         "token": token,
@@ -53,7 +63,9 @@ def main():
     except Exception as e:  # noqa: BLE001
         sys.exit(f"ERROR al publicar: {e}")
     if not res.get("ok"):
-        sys.exit(f"ERROR del servidor: {res.get('error')}")
+        err = res.get("error")
+        pista = {"token": " (LIBRO_TOKEN no coincide con el TOKEN de Code.gs)"}.get(err, "")
+        sys.exit(f"ERROR del servidor: {err}{pista}. Si el servidor no reconoce la acción, publica la versión nueva de Code.gs.")
     print(f"Informe publicado (fila {res.get('fila')} de la pestaña Informes).")
 
 
