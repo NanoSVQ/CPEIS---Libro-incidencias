@@ -249,6 +249,20 @@
   .dia-grupo h4 { margin: 0 0 2px; font-size: 14px; }
   .dia-grupo .lista li { padding: 9px 0; }
 
+  .relato { margin-top: 14px; font-size: 16.5px; line-height: 1.65; }
+  .relato h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--acento); margin: 22px 0 8px; }
+  .relato h3:first-child { margin-top: 4px; }
+  .relato p { margin: 0 0 12px; }
+  .relato ul { margin: 0 0 12px; padding-left: 20px; }
+  .relato li { margin: 4px 0; }
+  .relato strong { color: var(--txt); }
+  .relato .vacia { font-size: 15px; }
+  .aviso-viejo { color: var(--warn); }
+  .lista li.dia-cab { border-top: 0; border-bottom: 1px solid var(--line); padding: 22px 0 7px; font-size: 14.5px; font-weight: 700; color: var(--muted); }
+  .lista li.dia-cab:first-child { padding-top: 6px; }
+  .lista li.dia-cab + li { border-top: 0; }
+  .lista li.dia-cab b { color: var(--acento); }
+
   @media print {
     .hdr, footer, .noprint, .toast, .pop { display: none !important; }
     :root { --bg: #fff; --panel: #fff; --campo-bg: #fff; --txt: #000; --muted: #444; --line: #ccc; --acento: #215732; }
@@ -366,23 +380,25 @@
   <section id="v-informe" hidden>
    <div class="panel">
     <div class="cab-lista">
-      <h2>Informe · últimos 15 días</h2>
+      <h2>Informe de la quincena</h2>
       <button class="btn link noprint" id="infRefrescar">Actualizar</button>
     </div>
+    <div class="ayuda" id="narEstado"></div>
+    <article class="relato" id="narTexto"></article>
+    <div class="acciones noprint" style="margin-top:16px">
+      <button class="btn" id="infCopiar">Copiar informe</button>
+      <button class="btn" id="infImprimir">Imprimir / PDF</button>
+    </div>
+   </div>
+
+   <div class="panel">
+    <h2>Estadística · últimos 15 días</h2>
     <div class="ayuda" id="infEstado"></div>
     <div class="kpis" id="infKpis"></div>
     <h3>Anotaciones por día</h3>
     <div class="barras" id="infBarras"></div>
     <h3>Por persona</h3>
     <ul class="rank" id="infPersonas"></ul>
-   </div>
-   <div class="panel">
-    <h2>Detalle</h2>
-    <div id="infDetalle"></div>
-   </div>
-   <div class="acciones noprint">
-     <button class="btn" id="infCopiar">Copiar informe</button>
-     <button class="btn" id="infImprimir">Imprimir / PDF</button>
    </div>
   </section>
 
@@ -524,12 +540,14 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
 - Cabecera: fila superior con logotipo y estado; debajo, subtítulo con pestañas Libro / Calendario / Informe y Ajustes.
 - Calendario: mes actual con los días que tienen incidencias; al pasar el cursor se muestran en una ventana emergente.
 - Informe: incidencias de los últimos 15 días (más adelante, rutina de Claude Code que leerá la hoja y emitirá un informe).
+- Informe: arriba el informe narrativo generado por una rutina diaria de Claude (8:00) a partir de las anotaciones de los últimos 15 días; abajo la estadística; sin detalle repetido.
+- Libro: anotaciones agrupadas por día con un epígrafe por día.
 - Integrar el logotipo CPEIS Provincia de Sevilla facilitado por el usuario y sustituir el fondo blanco por una estética nueva.</script>
 
 <script>
 (() => {
   'use strict';
-  const APP_VERSION = '20261104.4';
+  const APP_VERSION = '20261104.5';
   const MAX_TEXTO = 5000;
   const OTRO = '__otro__';
 
@@ -682,19 +700,29 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
 
   /* ---------------- Últimas anotaciones ---------------- */
   const quienHtml = (n) => n ? `<span class="quien">${esc(n)}</span>` : '<span class="quien vacio">Sin indicar</span>';
+  function cabeceraDia(dia) {
+    const hoy = hoyMadrid();
+    const pref = dia === hoy ? 'Hoy · ' : (dia === addDias(hoy, -1) ? 'Ayer · ' : '');
+    return `<li class="dia-cab">${pref ? '<b>' + pref + '</b>' : ''}${esc(diaLargo(dia))}</li>`;
+  }
   function pintarLista() {
     const mios = new Set(misUids);
+    const items = cola.slice().reverse().map((x) => ({ pend: true, uid: x.uid, bombero: x.bombero, texto: x.texto, dia: diaDeMs(x.creado), hora: fmtHora(x.creado) }))
+      .concat(registros.map((r) => ({ uid: r.uid, bombero: r.bombero, texto: r.texto, dia: diaDeRegistro(r), hora: horaDe(r), fecha: r.fecha })));
     const html = [];
-    cola.slice().reverse().forEach((x) => {
-      html.push(`<li class="pendiente"><div class="meta">${quienHtml(x.bombero)}<span>${esc(fmtFecha(x.creado))}</span>
-        <span class="tag pend">Pendiente de envío</span>
-        ${enviando ? '' : `<button class="x" data-borrar="${esc(x.uid)}">Eliminar</button>`}</div>
-        <div class="texto">${esc(x.texto)}</div></li>`);
-    });
-    registros.forEach((r) => {
-      html.push(`<li><div class="meta">${quienHtml(r.bombero)}<span>${esc(r.fecha)}</span>
-        ${r.uid && mios.has(r.uid) ? '<span class="tag ok">✓ Enviado</span>' : ''}</div>
-        <div class="texto">${esc(r.texto)}</div></li>`);
+    let diaActual = null;
+    items.forEach((x) => {
+      if (x.dia !== diaActual) { diaActual = x.dia; if (x.dia) html.push(cabeceraDia(x.dia)); }
+      if (x.pend) {
+        html.push(`<li class="pendiente"><div class="meta">${quienHtml(x.bombero)}<span>${esc(x.hora)}</span>
+          <span class="tag pend">Pendiente de envío</span>
+          ${enviando ? '' : `<button class="x" data-borrar="${esc(x.uid)}">Eliminar</button>`}</div>
+          <div class="texto">${esc(x.texto)}</div></li>`);
+      } else {
+        html.push(`<li><div class="meta">${quienHtml(x.bombero)}<span>${esc(x.dia ? x.hora : x.fecha)}</span>
+          ${x.uid && mios.has(x.uid) ? '<span class="tag ok">✓ Enviado</span>' : ''}</div>
+          <div class="texto">${esc(x.texto)}</div></li>`);
+      }
     });
     $('lista').innerHTML = html.length ? html.join('') : '<li class="vacia" style="border:0">No hay anotaciones todavía.</li>';
   }
@@ -981,8 +1009,54 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
   function ocultarPop() { $('pop').hidden = true; }
 
   /* ---------------- Informe ---------------- */
-  let infTexto = '';
+    let narrativo = store.get('informeNarrativo', null);
+  /** Markdown mínimo: "## título", "- viñeta", **negrita**, párrafos. Siempre escapado. */
+  function mdAHtml(md) {
+    const inline = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    const out = []; let lista = false; let parrafo = [];
+    const cerrarP = () => { if (parrafo.length) { out.push('<p>' + inline(parrafo.join(' ')) + '</p>'); parrafo = []; } };
+    const cerrarL = () => { if (lista) { out.push('</ul>'); lista = false; } };
+    String(md || '').replace(/\r/g, '').split('\n').forEach((l) => {
+      const t = l.trim();
+      if (!t) { cerrarP(); cerrarL(); return; }
+      let m;
+      if ((m = t.match(/^#{1,6}\s+(.*)$/))) { cerrarP(); cerrarL(); out.push('<h3>' + inline(m[1]) + '</h3>'); return; }
+      if ((m = t.match(/^[-*•]\s+(.*)$/))) { cerrarP(); if (!lista) { out.push('<ul>'); lista = true; } out.push('<li>' + inline(m[1]) + '</li>'); return; }
+      cerrarL(); parrafo.push(t);
+    });
+    cerrarP(); cerrarL();
+    return out.join('');
+  }
+  function pintarNarrativo(estadoExtra) {
+    const el = $('narTexto');
+    if (!narrativo) {
+      el.innerHTML = '<div class="vacia">Aún no hay ningún informe. La rutina diaria lo genera cada mañana a partir de las anotaciones de los últimos 15 días.</div>';
+      $('narEstado').textContent = estadoExtra || '';
+      return;
+    }
+    el.innerHTML = mdAHtml(narrativo.texto);
+    const viejo = narrativo.generadoTs && (Date.now() - narrativo.generadoTs > 36 * 3600e3);
+    const per = narrativo.desde && narrativo.hasta ? ` · periodo ${diaCorto(narrativo.desde)} – ${diaCorto(narrativo.hasta)}` : '';
+    const n = narrativo.anotaciones ? ` · ${plural(narrativo.anotaciones, 'anotación', 'anotaciones')}` : '';
+    $('narEstado').innerHTML = `Generado el ${esc(narrativo.generado)}${esc(per)}${esc(n)}` +
+      (viejo ? ' · <span class="aviso-viejo">tiene más de un día: revisa la rutina</span>' : '') +
+      (estadoExtra ? ' · ' + esc(estadoExtra) : '');
+  }
+  async function cargarNarrativo() {
+    pintarNarrativo(cfg.url ? 'cargando…' : 'configura la conexión en Ajustes');
+    if (!cfg.url) return;
+    try {
+      const j = await apiGet({ action: 'informe' });
+      narrativo = j.informe || null;
+      store.set('informeNarrativo', narrativo);
+      pintarNarrativo('');
+    } catch (e) {
+      const msg = /accion desconocida/.test(e.message) ? 'el script de Google no está actualizado' : errorLegible(e) + (narrativo ? ' (copia guardada)' : '');
+      pintarNarrativo(msg);
+    }
+  }
   async function cargarInforme() {
+    cargarNarrativo();
     const hasta = hoyMadrid(), desde = addDias(hasta, -14);
     $('infEstado').textContent = `Del ${diaCorto(desde)} al ${diaCorto(hasta)} · cargando…`;
     pintarInforme(conPendientes([], desde, hasta), desde, hasta);
@@ -1023,26 +1097,6 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
       `<li><span class="nom${k ? '' : ' vacio'}">${esc(k || 'Sin indicar')}</span><span class="bar" style="width:${Math.max(4, Math.round(n / maxP * 100))}%"></span><span class="num">${n}</span></li>`).join('')
       : '<li class="vacia">Sin anotaciones en el periodo.</li>';
 
-    const diasDesc = dias.slice().reverse().filter((d) => (g[d] || []).length);
-    $('infDetalle').innerHTML = diasDesc.length ? diasDesc.map((d) =>
-      `<div class="dia-grupo"><h4>${esc(diaLargo(d))}</h4><ul class="lista">${g[d].map((r) => itemHtml(r, false)).join('')}</ul></div>`).join('')
-      : '<div class="vacia">No hay anotaciones en los últimos 15 días.</div>';
-
-    const pq = $('subParque').textContent;
-    const lin = [
-      'INFORME DE INCIDENCIAS' + (/^Parque /.test(pq) ? ' — ' + pq : ''),
-      `Periodo: ${diaCorto(desde)} – ${diaCorto(hasta)} (15 días)`,
-      `Total: ${plural(total, 'anotación', 'anotaciones')} · ${conAnot} días con anotaciones`,
-      'Por persona: ' + (personas.length ? personas.map(([k, n]) => `${k || 'Sin indicar'} (${n})`).join(', ') : '—'),
-      ''
-    ];
-    diasDesc.forEach((d) => {
-      lin.push(`--- ${diaLargo(d)} (${diaCorto(d)}) ---`);
-      g[d].forEach((r) => lin.push(`${horaDe(r)} · ${r.bombero || 'Sin indicar'}${r.pend ? ' [pendiente de envío]' : ''}: ${r.texto}`));
-      lin.push('');
-    });
-    lin.push('Herramienta personal · no oficial');
-    infTexto = lin.join('\n');
   }
 
   /* ---------------- Vistas ---------------- */
@@ -1081,7 +1135,10 @@ Tiene dos pestañas con estas cabeceras en la fila 1:
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') ocultarPop(); });
   $('infRefrescar').addEventListener('click', cargarInforme);
   $('infCopiar').addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(infTexto); toast('Informe copiado'); } catch (e) { toast('No se pudo copiar'); }
+    const t = narrativo ? `INFORME DE LA QUINCENA${/^Parque /.test($('subParque').textContent) ? ' — ' + $('subParque').textContent : ''}\nGenerado el ${narrativo.generado}\n\n` +
+      narrativo.texto.replace(/\*\*(.+?)\*\*/g, '$1').replace(/^#{1,6}\s+/gm, '').trim() + '\n\nHerramienta personal · no oficial' : '';
+    if (!t) { toast('Aún no hay informe'); return; }
+    try { await navigator.clipboard.writeText(t); toast('Informe copiado'); } catch (e) { toast('No se pudo copiar'); }
   });
   $('infImprimir').addEventListener('click', () => window.print());
   $('selPersona').addEventListener('change', () => {
